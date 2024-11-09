@@ -163,10 +163,10 @@ class SimulationEnv(BaseEnv):
         # Fill observation channels
         agent_pos = self.agent_positions[agent_id]
 
-        # if 'catcher' in agent_id:
-        #     agent_pos = self.catcher_positions[agent_id]
-        # else:
-        #     agent_pos = self.runner_positions[agent_id]
+        if 'catcher' in agent_id:
+            agent_pos = self.catcher_positions[agent_id]
+        else:
+            agent_pos = self.runner_positions[agent_id]
             
         # Add agents and obstacles to observation (with partial observability)
         self._add_visible_agents_to_obs(obs, agent_pos)
@@ -221,8 +221,8 @@ class SimulationEnv(BaseEnv):
         return True
     
     def _update_positions(self, actions):
-        """에이전트 위치 업데이트"""
-        print("\nPosition updates:")
+        # """에이전트 위치 업데이트"""
+        # print("\nPosition updates:")
         for agent_id, action in actions.items():
             current_pos = self.agent_positions[agent_id]
             
@@ -234,12 +234,6 @@ class SimulationEnv(BaseEnv):
             new_x = np.clip(current_pos[0] + dx, 0, self.grid_size)
             new_y = np.clip(current_pos[1] + dy, 0, self.grid_size)
             new_pos = np.array([new_x, new_y])
-            
-            print(f"{agent_id}:")
-            print(f"  Current pos: {current_pos}")
-            print(f"  Action: {action}")
-            print(f"  Delta: ({dx:.3f}, {dy:.3f})")
-            print(f"  New pos: {new_pos}")
             
             self.agent_positions[agent_id] = new_pos
     

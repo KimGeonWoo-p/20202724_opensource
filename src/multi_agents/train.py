@@ -47,7 +47,7 @@ class MetricLogger:
             # 각 메트릭 처리
             for key in self.metric_keys:
                 if key not in metrics_dict:
-                    print(f"Warning: Missing metric '{key}' in metrics_dict")
+                    # print(f"Warning: Missing metric '{key}' in metrics_dict")
                     continue
                     
                 value = metrics_dict[key]
@@ -147,8 +147,8 @@ class MetricLogger:
             self.eval_metrics['eval_reward'].append(eval_metrics_dict['reward'])
             self.eval_metrics['eval_collision_rate'].append(eval_metrics_dict['collision_rate'])
             
-            # 평가 결과 그래프 업데이트
-            self.plot_eval_metrics()
+            # # 평가 결과 그래프 업데이트
+            # self.plot_eval_metrics()
             
         except Exception as e:
             print(f"Error in log_evaluation: {str(e)}")
@@ -287,14 +287,6 @@ def main():
         'render_interval': 10,     # 렌더링 간격
     }
     
-    print("\nEnvironment Configuration:")
-    print(f"Number of Catchers: {env_config['n_catchers']}")
-    print(f"Number of Runners: {env_config['n_runners']}")
-    print(f"Total Agents: {n_agents}")
-    print(f"Original Observation Shape: {obs_shape}")
-    print(f"Flattened State Dimension: {state_dim}")
-    print(f"Action Dimension: {env.action_space.shape[0]}")
-    
     # MAPOCA 초기화
     mapoca = MAPOCA(model_config)
     
@@ -364,18 +356,7 @@ def main():
             
             # 모델 업데이트
             if mapoca.is_ready_to_update():
-                losses = mapoca.update()
-                if losses and episode % train_config['log_interval'] == 0:
-                    print("\nTraining Metrics:")
-                    for key, value in losses.items():
-                        print(f"{key}: {value:.4f}")
-            
-            # 현재 상태 출력
-            if episode % train_config['log_interval'] == 0:
-                print(f"\nStep {episode_steps}:")
-                print(f"Actions: {actions_dict}")
-                print(f"Rewards: {rewards_dict}")
-            
+                mapoca.update()
             if done:
                 break
         
@@ -390,21 +371,11 @@ def main():
         
         logger.log_episode(episode, metrics)
         
-        # 주기적으로 그래프 업데이트
-        if episode % train_config['render_interval'] == 0:
-            logger.plot_metrics()
-        
         # 주기적으로 모델 평가
         if episode % train_config['eval_interval'] == 0:
             eval_metrics = evaluate(env, mapoca, num_episodes=5)
             logger.log_evaluation(episode, eval_metrics)
             
-            print("\nEvaluation Results:")
-            print(f"Success Rate: {eval_metrics['success_rate']:.3f}")
-            print(f"Average Catch Time: {eval_metrics['avg_catch_time']:.1f}")
-            print(f"Average Reward: {eval_metrics['reward']:.3f}")
-            print(f"Collision Rate: {eval_metrics['collision_rate']:.3f}")
-        
         # 주기적으로 체크포인트 저장
         if episode % train_config['save_interval'] == 0:
             mapoca.save_checkpoint(f'checkpoints/episode_{episode}.pt')
